@@ -10,6 +10,8 @@ Este patron de diseño consiste en solo tener una instancia por clase o instanci
 
 Es uno de los patrones de diseño mas usados en Java. Es un patron de diseño creational.
 
+Desacopla implementacion concreta desde el cliente.
+
 En este patron crearemos un objeto sin necesidad de exponer la logica de creacion del objeto a el cliente y crear el nuevo objeto usando una interface comun.
 
 En este patron definiremos los siguientes elementos
@@ -53,6 +55,8 @@ En este patron definiremos los siguientes elementos
 ## Abstract Factory
 
 Se define una fabrica de objetos de una familia de productos, en esta fabrica se especifica la creacion concreta de cada una de las partes del objeto.
+
+Desacopla implementacion concreta desde el cliente.
 
 El Factory Abstract esta orientado a la construccion de objetos en sus subclases.
 
@@ -201,13 +205,137 @@ Este patron esta conformado por las siguientes partes.
 
 ## Builder
 
-El Builder esta orientado a la construccion de objetos complejos.
+El patron Builder es un patron creacional que esta orientado a la creacion o construccion de objetos complejos en base a objetos simples.
+
+Sus componentes son:
+
+1. Director
+
+		public class Waiter {
+		    AbstractBuilder abstractBuilder;
+
+		    public void setAbstractBuilder(AbstractBuilder abstractBuilder) {
+		        this.abstractBuilder = abstractBuilder;
+		    }
+
+		    public void createDinner() {
+		        System.out.println("Creating The Dinner !!");
+		        abstractBuilder.createDinner();
+		        abstractBuilder.buildDessert();
+		        abstractBuilder.buildDrink();
+		        abstractBuilder.buildMainDish();
+		    }
+
+		    public Dinner getDinner() {
+		        return abstractBuilder.getDinner();
+		    }
+
+		}
+
+
+2. Clase Abstracta
+
+		public abstract class AbstractBuilder {
+
+		    protected static final AbstractFactory DRINK_INSTANCE = AbstractFactory.getFactoryInstance(TypesFactories.DRINK);
+		    protected static final AbstractFactory MAINDISH_INSTANCE = AbstractFactory.getFactoryInstance(TypesFactories.MAINDISH);
+		    protected static final AbstractFactory DESSERT_INSTANCE = AbstractFactory.getFactoryInstance(TypesFactories.DESSERT);
+
+		    protected Dinner dinner;
+
+		    public Dinner getDinner(){
+		        return dinner;
+		    }
+
+		    public void createDinner() {
+		        dinner = new Dinner();
+		    }
+
+		    public abstract void buildDrink();
+		    public abstract void buildDessert();
+		    public abstract void buildMainDish();
+		}
+
+3. Clases Concretas
+
+		public class HealthDinner extends AbstractBuilder {
+
+		    public void buildDrink() {
+		        dinner.setDrink(AbstractBuilder.DRINK_INSTANCE.getDrink(TypesDrink.WATER));
+		    }
+
+		    public void buildDessert() {
+		        dinner.setDessert(AbstractBuilder.DESSERT_INSTANCE.getDessert(TypesDessert.CAKE));
+		    }
+
+		    public void buildMainDish() {
+		        dinner.setMainDish(AbstractBuilder.MAINDISH_INSTANCE.getMainDish(TypesMainDish.MEAT));
+		    }
+		}
 
 
 
+		public class JunkDinner extends AbstractBuilder  {
+		    public void buildDrink() {
+		        dinner.setDrink(AbstractBuilder.DRINK_INSTANCE.getDrink(TypesDrink.COCACOLA));
+		    }
 
+		    public void buildDessert() {
+		        dinner.setDessert(AbstractBuilder.DESSERT_INSTANCE.getDessert(TypesDessert.ICECREAM));
+		    }
 
+		    public void buildMainDish() {
+		        dinner.setMainDish(AbstractBuilder.MAINDISH_INSTANCE.getMainDish(TypesMainDish.BURGER));
+		    }
+		}
 
+4. Objeto Principal
 
+		public class Dinner {
+
+		    private Drink drink;
+		    private Dessert dessert;
+		    private MainDish mainDish;
+
+		    public Drink getDrink() {
+		        return drink;
+		    }
+
+		    public void setDrink(Drink drink) {
+		        this.drink = drink;
+		    }
+
+		    public Dessert getDessert() {
+		        return dessert;
+		    }
+
+		    public void setDessert(Dessert dessert) {
+		        this.dessert = dessert;
+		    }
+
+		    public MainDish getMainDish() {
+		        return mainDish;
+		    }
+
+		    public void setMainDish(MainDish mainDish) {
+		        this.mainDish = mainDish;
+		    }
+		}
+
+Y su mode de utilizar sería de la siguiente manera.
+
+			public static void main(String[] args) {
+			        Waiter waiter = new Waiter();
+			        waiter.setAbstractBuilder(new JunkDinner());
+			        waiter.createDinner();
+
+			        System.out.println("Creating another Dinner");
+			        waiter.setAbstractBuilder(new VegDinner());
+			        waiter.createDinner();
+
+			        System.out.println("Creating another Dinner");
+			        waiter.setAbstractBuilder(new HealthDinner());
+			        waiter.createDinner();
+			    }
 
 ## Composite
